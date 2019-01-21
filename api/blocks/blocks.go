@@ -2,10 +2,10 @@ package blocks
 
 import (
 	"encoding/json"
-	"github.com/ShyftNetwork/blockexplorer_ui/shyft_api/logger"
+	"github.com/ShyftNetwork/blockexplorer_api/logger"
 	"github.com/jmoiron/sqlx"
-	"github.com/ShyftNetwork/blockexplorer_ui/shyft_api/types"
-	"github.com/ShyftNetwork/blockexplorer_ui/shyft_api/db"
+	"github.com/ShyftNetwork/blockexplorer_api/types"
+	"github.com/ShyftNetwork/blockexplorer_api/db"
 )
 
 // BlockArrayMarshalling marshalls into account struct

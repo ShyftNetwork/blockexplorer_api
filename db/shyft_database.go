@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/ShyftNetwork/blockexplorer_ui/shyft_api/logger"
+	"github.com/ShyftNetwork/blockexplorer_api/logger"
 )
 
 var blockExplorerDb *sqlx.DB

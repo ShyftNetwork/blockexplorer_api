@@ -2,7 +2,7 @@ package common
 
 import (
 	"strconv"
-	"github.com/ShyftNetwork/blockexplorer_ui/shyft_api/logger"
+	"github.com/ShyftNetwork/blockexplorer_api/logger"
 )
 
 // StringToInteger returns int64 from string params

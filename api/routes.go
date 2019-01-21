@@ -20,7 +20,7 @@ var Endpoints = Routes{
 		"GetAllAccountLength",
 		"GET",
 		"/api/get_all_accounts_length",
-		SGetAllAccountsLength,
+		GetAllAccountsLength,
 	},
 	Route{
 		"GetAccount",
@@ -56,7 +56,7 @@ var Endpoints = Routes{
 		"GetAllBlocksLength",
 		"GET",
 		"/api/get_all_blocks_length",
-		SGetAllBlocksLength,
+		GetAllBlocksLength,
 	},
 	Route{
 		"GetBlock",

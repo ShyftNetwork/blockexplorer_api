@@ -9,16 +9,16 @@ import (
 	"net/http"
 
 	_ "github.com/lib/pq" //github.com/lib/pq needed for sqlx transactions
-	"github.com/ShyftNetwork/blockexplorer_ui/shyft_api/db"
+	"github.com/ShyftNetwork/blockexplorer_api/db"
 	"github.com/gorilla/mux"
-	b "github.com/ShyftNetwork/blockexplorer_ui/shyft_api/api/blocks"
-	tx "github.com/ShyftNetwork/blockexplorer_ui/shyft_api/api/transactions"
-	acc "github.com/ShyftNetwork/blockexplorer_ui/shyft_api/api/accounts"
-	"github.com/ShyftNetwork/blockexplorer_ui/shyft_api/logger"
-	"github.com/ShyftNetwork/blockexplorer_ui/shyft_api/api/common"
+	b "github.com/ShyftNetwork/blockexplorer_api/api/blocks"
+	tx "github.com/ShyftNetwork/blockexplorer_api/api/transactions"
+	acc "github.com/ShyftNetwork/blockexplorer_api/api/accounts"
+	"github.com/ShyftNetwork/blockexplorer_api/logger"
+	"github.com/ShyftNetwork/blockexplorer_api/api/common"
 )
 
-// SGetAllTransactionsLength Count all rows in Blocks Table
+// GetAllTransactionsLength Count all rows in Blocks Table
 func SGetAllTransactionsLength(w http.ResponseWriter, r *http.Request) {
 	dbase := db.ConnectShyftDatabase()
 
@@ -129,8 +129,8 @@ func GetAllBlocksMinedByAddress(w http.ResponseWriter, r *http.Request) {
 	logger.WriteLogger(w.Write(blocks))
 }
 
-// SGetAllAccountsLength Count all rows in accounts Table
-func SGetAllAccountsLength(w http.ResponseWriter, r *http.Request) {
+// GetAllAccountsLength Count all rows in accounts Table
+func GetAllAccountsLength(w http.ResponseWriter, r *http.Request) {
 	dbase := db.ConnectShyftDatabase()
 
 	count := b.RecordCountQuery(dbase, db.GetAccountCount)
@@ -236,7 +236,7 @@ func GetAllBlocksWithoutLimit(w http.ResponseWriter, r *http.Request) {
 }
 
 // SGetAllBlocksLength Count all rows in Blocks Table
-func SGetAllBlocksLength(w http.ResponseWriter, r *http.Request) {
+func GetAllBlocksLength(w http.ResponseWriter, r *http.Request) {
 	dbase := db.ConnectShyftDatabase()
 
 	count := b.RecordCountQuery(dbase, db.GetBlockCount)
