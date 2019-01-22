@@ -12,5 +12,5 @@ FROM scratch
 
 WORKDIR /root/
 COPY --from=builder ./go/src/github.com/ShyftNetwork/blockexplorer_api/blockx_api .
-CMD ["./shyft_api"]
+CMD ["./blockx_api"]
 EXPOSE 8080
