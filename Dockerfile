@@ -5,12 +5,12 @@ COPY . /go/src/github.com/ShyftNetwork/blockexplorer_api
 WORKDIR /go/src/github.com/ShyftNetwork/blockexplorer_api
 ENV GO111MODULE=on
 RUN go mod vendor
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o shyft_api .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o blockx_api .
 
 
 FROM scratch
 
 WORKDIR /root/
-COPY --from=builder ./go/src/github.com/ShyftNetwork/blockexplorer_api/shyft_api .
+COPY --from=builder ./go/src/github.com/ShyftNetwork/blockexplorer_api/blockx_api .
 CMD ["./shyft_api"]
 EXPOSE 8080

@@ -19,3 +19,5 @@
 *.launch
 .settings/
 *.sublime-workspace
+
+vendor/
