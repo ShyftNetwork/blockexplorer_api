@@ -38,7 +38,7 @@ const GetAllAccountsNoLimit = `SELECT * FROM accounts ORDER BY balance ASC`
 // GetAccountCount returns count of rows in accounts table
 const GetAccountCount = `SELECT COUNT(*) FROM accounts`
 // GetAllAccounts returns all accounts based on offset limit
-const GetAllAccounts = `SELECT * FROM accounts LIMIT $1 OFFSET $2`
+const GetAllAccounts = `SELECT * FROM accounts ORDER BY balance LIMIT $1 OFFSET $2`
 // GetAccount returns specified account
 const GetAccount = `SELECT * FROM accounts WHERE addr=$1;`
 // GetAccountTransactions returns all txs from specified account address
