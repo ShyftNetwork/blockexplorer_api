@@ -10,7 +10,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o blockx_api .
 
 FROM scratch
 
-WORKDIR /root/
+WORKDIR /
 COPY --from=builder ./go/src/github.com/ShyftNetwork/blockexplorer_api/blockx_api .
 CMD ["./blockx_api"]
 EXPOSE 8080
