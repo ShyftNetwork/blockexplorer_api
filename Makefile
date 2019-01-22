@@ -19,3 +19,14 @@ run:
 	@echo "  >  \033[32mStarting server...\033[0m "
 	go run *.go
 
+build:
+	@echo "  >  \033[32mBuilding binary...\033[0m "
+	go build -o shyft_api
+
+start:
+	@echo "  >  \033[32mStarting server...\033[0m "
+	./shyft_api
+
+install:
+	@echo "  >  \033[32mInstalling dependencies...\033[0m "
+	go mod vendor

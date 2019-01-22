@@ -1,13 +1,19 @@
-FROM golang:1.10.3-alpine
+FROM golang:1.11.4-alpine3.7 as builder
 
 RUN apk add --update git make gcc musl-dev linux-headers ca-certificates
 
-COPY ./shyft_api /go/src/github.com/ShyftNetwork/blockexplorer_api
+COPY . /go/src/github.com/ShyftNetwork/blockexplorer_api
 WORKDIR /go/src/github.com/ShyftNetwork/blockexplorer_api
 
-RUN go get -u github.com/kardianos/govendor
-RUN govendor sync
+ENV GO111MODULE=on
 
-CMD go run -v *.go
+RUN make install
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o shyft_api .
 
+
+FROM scratch
+
+COPY --from=builder ./go/src/github.com/ShyftNetwork/blockexplorer_api/shyft_api .
+ADD shyft_api /
+CMD ["/shyft_api"]
 EXPOSE 8080
