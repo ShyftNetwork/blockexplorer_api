@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/ShyftNetwork/blockexplorer_ui/shyft_api/logger"
-	"github.com/ShyftNetwork/blockexplorer_ui/shyft_api/api"
+	"github.com/ShyftNetwork/blockexplorer_api/logger"
+	"github.com/ShyftNetwork/blockexplorer_api/api"
 )
 
 func main() {
