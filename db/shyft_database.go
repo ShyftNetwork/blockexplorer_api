@@ -40,7 +40,7 @@ func ShyftConnectStr() string {
 func Connect(connectURL string) *sqlx.DB {
 	db, err := sqlx.Connect("postgres", connectURL)
 	if err != nil {
-		fmt.Println("ERROR OPENING DB, NOT INITIALIZING")
+		logger.Warn("Database error: " + err.Error())
 		panic(err)
 	}
 	err = db.Ping()
@@ -53,11 +53,12 @@ func Connect(connectURL string) *sqlx.DB {
 // NewShyftDatabase returns a PostgresDB wrapped object.
 func NewShyftDatabase() (*SPGDatabase, error) {
 	if blockExplorerDb == nil {
-		logger.Log("DB Connected !!")
 		blockExplorerDb = Connect(ShyftConnectStr())
 		conn := blockExplorerDb
 		if err := conn.Ping(); err != nil {
 			logger.Warn("Database error: " + err.Error())
+		} else {
+			logger.Log("DB Connected !!")
 		}
 		return &SPGDatabase{
 			Db: conn,
