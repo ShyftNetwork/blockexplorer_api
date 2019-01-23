@@ -21,12 +21,20 @@ run:
 
 build:
 	@echo "  >  \033[32mBuilding binary...\033[0m "
-	go build -o shyft_api
+	go build -o blockx_api
 
 start:
 	@echo "  >  \033[32mStarting server...\033[0m "
-	./shyft_api
+	./blockx_api
 
 install:
 	@echo "  >  \033[32mInstalling dependencies...\033[0m "
 	go mod vendor
+
+docker:
+	@echo "  >  \033[32mStarting...\033[0m "
+	make build
+	@echo "  >  \033[32mBuilding docker image from Dockerfile...\033[0m "
+	docker build -t shyft_api .
+	@echo "  >  \033[32mRunning application through docker...\033[0m "
+	docker run -p 8080:8080 shyft_api
