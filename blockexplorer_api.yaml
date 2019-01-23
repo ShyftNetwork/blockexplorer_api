@@ -1,0 +1,44 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: block-explorer-api
+spec:
+  selector:
+    app: block-explorer
+    component: block-explorer-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+  type: LoadBalancer
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: api-deployment
+  labels:
+    app: block-explorer
+    component: block-explorer-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: block-explorer
+      component: block-explorer-api
+  template:
+    metadata:
+      labels:
+        app: block-explorer
+        component: block-explorer-api
+    spec:
+      containers:
+      - name: block-explorer
+        image: block-explorer-api
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+        - name: API_PORT
+          value: "8080"
+        - name: GO111MODULE
+          value: on

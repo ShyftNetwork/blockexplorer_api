@@ -1,0 +1,488 @@
+# openapi/blockexplorer_api.yaml
+
+openapi: 3.0.0
+servers:
+- url: /api
+info:
+  title: Shyft Block Explorer API
+  version: '1.0'
+  description: >
+    API responsible for serving Shyft Block Explorer and communicating with Shyft go-empyrean postgres instance.
+paths:
+  /get_all_blocks/{currentPage}/{pageLimit}:
+    get:
+      description: |
+        Get list of all blocks based on page and page limit set
+      responses:
+        '200':
+          description: |
+            Request successfully returned list of all blocks based on page and page limit set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/blocks'
+      parameters:
+      - in: query
+          name: currentPage
+          schema:
+            type: string
+          description: Used to calculate offset which determines the number of items to skip before starting to collect the result set
+      - in: query
+        name: pageLimit
+        schema:
+          type: string
+        description: The numbers of items to return
+  /get_block/{blockNumber}:
+    get:
+      description: |
+        Get a particular block with block number `blocknumber`
+      responses:
+        '200':
+          description: |
+            Request was successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/block'
+      parameters:
+      - in: query
+        name: blocknumber
+        schema:
+          type: string
+        description: Block number of the block to get.
+  /get_recent_block:
+    get:
+      description: |
+        Get the latest block that has been mined, based on block height
+      responses:
+        '200':
+          description: |
+            Request was successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/block'
+  /get_blocks_mined/{currentPage}/{pageLimit}/{coinbase}:
+    get:
+      description: |
+        Get list of all blocks mined from a particular account with account address `coinbase` based on page and page limit set
+      responses:
+        '200':
+          description: |
+            Request successfully returned list of all blocks mined for a particular account based on page and page limit set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/blocks'
+      parameters:
+      - in: query
+          name: currentPage
+          schema:
+            type: string
+          description: Used to calculate offset which determines the number of items to skip before starting to collect the result set
+      - in: query
+        name: pageLimit
+        schema:
+          type: string
+        description: The numbers of items to return
+      - in: query
+        name: coinbase
+        schema:
+          type: string
+        description: Account address of the miners account to get.
+  /get_all_accounts/{currentPage}/{pageLimit}:
+    get:
+      description: |
+        Get list of all accounts based on page and page limit set
+      responses:
+        '200':
+          description: |
+            Request successfully returned list of all accounts based on page and page limit set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/accounts'
+      parameters:
+      - in: query
+          name: currentPage
+          schema:
+            type: string
+          description: Used to calculate offset which determines the number of items to skip before starting to collect the result set
+      - in: query
+        name: pageLimit
+        schema:
+          type: string
+        description: The numbers of items to return
+  /get_account/{address}:
+    get:
+      description: |
+        Get a particular account with account address `address`
+      responses:
+        '200':
+          description: |
+            Request was successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/account'
+      parameters:
+      - in: query
+        name: address
+        schema:
+          type: string
+        description: Account address of the account to get.
+  /get_account_txs/{currentPage}/{pageLimit}/{address}:
+    get:
+      description: |
+        Get list of all transactions from a particular account with account address `address` based on page and page limit set
+      responses:
+        '200':
+          description: |
+            Request successfully returned list of all transactions for a particular account based on page and page limit set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/transactions'
+      parameters:
+      - in: query
+          name: currentPage
+          schema:
+            type: string
+          description: Used to calculate offset which determines the number of items to skip before starting to collect the result set
+      - in: query
+        name: pageLimit
+        schema:
+          type: string
+        description: The numbers of items to return
+      - in: query
+        name: address
+        schema:
+          type: string
+        description: Account address of the account to get.
+  /get_all_transactions/{currentPage}/{pageLimit}:
+    get:
+      description: |
+        Get list of all transactions based on page and page limit set
+      responses:
+        '200':
+          description: |
+            Request successfully returned list of all transactions based on page and page limit set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/transactions'
+      parameters:
+      - in: query
+          name: currentPage
+          schema:
+            type: string
+          description: Used to calculate offset which determines the number of items to skip before starting to collect the result set
+      - in: query
+        name: pageLimit
+        schema:
+          type: string
+        description: The numbers of items to return
+  /get_transaction/{txHash}:
+    get:
+      description: |
+        Get a particular transaction with tx hash address `txHash`
+      responses:
+        '200':
+          description: |
+            Request was successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/transaction'
+      parameters:
+      - in: query
+        name: txHash
+        schema:
+          type: string
+        description: Transaction hash of the transaction to get.
+  /get_all_transactions_from_block/{currentPage}/{pageLimit}/{blockNumber}:
+    get:
+      description: |
+        Get list of all transactions from a particular block with block number `blockNumber` based on page and page limit set
+      responses:
+        '200':
+          description: |
+            Request successfully returned list of all transactions for a particular block based on page and page limit set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/transactions'
+      parameters:
+      - in: query
+          name: currentPage
+          schema:
+            type: string
+          description: Used to calculate offset which determines the number of items to skip before starting to collect the result set
+      - in: query
+        name: pageLimit
+        schema:
+          type: string
+        description: The numbers of items to return
+      - in: query
+        name: blockNumber
+        schema:
+          type: string
+        description: Block number of the block's transactions to get.
+  /get_internal_transactions/{currentPage}/{pageLimit}:
+    get:
+      description: |
+        Get list of all internal transactions based on page and page limit set
+      responses:
+        '200':
+          description: |
+            Request successfully returned list of all internal transactions based on page and page limit set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/internals'
+      parameters:
+      - in: query
+          name: currentPage
+          schema:
+            type: string
+          description: Used to calculate offset which determines the number of items to skip before starting to collect the result set
+      - in: query
+        name: pageLimit
+        schema:
+          type: string
+        description: The numbers of items to return
+  /get_internal_transactions/{txHash}:
+    get:
+      description: |
+        Get a particular internal transaction with tx hash address `txHash`
+      responses:
+        '200':
+          description: |
+            Request was successfully completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/internals'
+      parameters:
+      - in: query
+        name: txHash
+        schema:
+          type: string
+        description: Transaction hash of the internal transaction to get.
+components:
+  schemas:
+    blocks:
+      type: array
+      items:
+        $ref: '#/components/schemas/block'
+
+    block:
+      type: object
+      required:
+      - block_hash
+      - coinbase_hash
+      - block_timestamp
+      - block_parenthash
+      - block_unclehash
+      - block_difficulty
+      - block_size
+      - block_rewards
+      - block_height
+      - block_gas
+      - block_gaslimit
+      - block_nonce
+      - block_txs
+      - block_uncles
+      properties:
+        block_hash:
+          type: string
+          description: Block Hash
+        coinbase_hash:
+          type: string
+          description: Miner of the blocks address
+        block_timestamp:
+          type: string
+          description: When block was mined
+        block_parenthash:
+          type: string
+          description: The blocks parent's block hash
+        block_unclehash:
+          type: string
+          description: The blocks uncle's block hash
+        block_difficulty:
+          type: string
+          description: The blocks difficulty
+        block_size:
+          type: string
+          description: The blocks size
+        block_rewards:
+          type: string
+          description: The rewards for the block
+        block_height:
+          type: string
+          description: The block number or height
+        block_gas:
+          type: integer
+          description: The blocks gas
+        block_gaslimit:
+          type: integer
+          description: The blocks gas limit
+        block_nonce:
+          type: integer
+          description: The blocks nonce
+        block_txs:
+          type: integer
+          description: The number of transactions included in the block
+        block_uncles:
+          type: integer
+          description: The number of uncles
+
+    accounts:
+      type: array
+      items:
+        $ref: '#/components/schemas/account'
+
+    account:
+      type: object
+      required:
+      - address
+      - balance
+      - nonce
+      properties:
+        address:
+          type: string
+          description: Account address
+        balance:
+          type: string
+          description: Account balance
+        nonce:
+          type: string
+          description: Number of transactions sent from account
+
+    transactions:
+      type: array
+      items:
+        $ref: '#/components/schemas/transaction'
+
+      transaction:
+        type: object
+        required:
+        - tx_hash
+        - to_address
+        - from_address
+        - block_hash
+        - block_height
+        - tx_amount
+        - gas_price
+        - tx_gas
+        - gas_limit
+        - tx_cost
+        - tx_nonce
+        - tx_status
+        - is_contract
+        - tx_timestamp
+        - tx_data
+        properties:
+          tx_hash:
+            type: string
+            description: Transaction Hash
+          to_address:
+            type: string
+            description: Address of the account being sent the transaction
+          from_address:
+            type: string
+            description: Address of the account sending the transaction
+          block_hash:
+            type: string
+            description: Block hash
+          block_height:
+            type: string
+            description: The block number or height
+          tx_amount:
+            type: string
+            description: Amount of wei being sent in transaction
+          gas_price:
+            type: integer
+            description: Price of gas for transaction
+          tx_gas:
+            type: integer
+            description: The amount of gas used for transaction
+          gas_limit:
+            type: integer
+            description: The maximum amount of gas set for transaction
+          tx_cost:
+            type: string
+            description: The cost of the transaction
+          tx_nonce:
+            type: string
+            description: The nonce of transaction
+          tx_status:
+            type: string
+            description: Whether the transaction was successful or not
+          is_contract:
+            type: bool
+            description: Whether the transaction was from a contract or not
+          tx_timestamp:
+            type: string
+            description: When the transaction took place
+          tx_data:
+            type: bytes
+            description: Contract code
+
+    internals:
+      type: array
+      items:
+        $ref: '#/components/schemas/internal'
+
+      internal:
+        type: object
+        required:
+        - internal_id
+        - tx_hash
+        - block_hash
+        - internal_action
+        - from_address
+        - to_address
+        - tx_amount
+        - internal_gas
+        - gas_used
+        - internal_input
+        - internal_output
+        - internal_time
+        properties:
+          internal_id:
+            type: integer
+            description: ID of internal transaction
+          tx_hash:
+            type: string
+            description: Transaction Hash
+          block_hash:
+            type: string
+            description: Block hash
+          internal_action:
+            type: string
+            description: Whether the internal transaction were initiated by "CALL" or "CREATE"
+          from_address:
+            type: string
+            description: Address of the account sending the transaction
+          to_address:
+            type: string
+            description: Address of the account being sent the transaction
+          tx_amount:
+            type: string
+            description: Amount of wei being sent in transaction
+          internal_gas:
+            type: integer
+            description: The amount of gas limit set for transaction
+          gas_used:
+            type: integer
+            description: The amount of gas used for transaction
+          internal_input:
+            type: string
+            description: Parameter passed into contract function
+          internal_output:
+            type: string
+            description: Return values from contract function
+          internal_time:
+            type: string
+            description: Timestamp of when transaction took place

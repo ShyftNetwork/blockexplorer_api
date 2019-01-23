@@ -65,6 +65,12 @@ var Endpoints = Routes{
 		GetBlock,
 	},
 	Route{
+		Name:        "GetRecentBlock",
+		Method:      "GET",
+		Pattern:     "/api/get_recent_block",
+		HandlerFunc: GetRecentBlock,
+	},
+	Route{
 		"GetAllTransactionsWithoutLimit",
 		"GET",
 		"/api/get_all_transactions_nolimit",
@@ -87,12 +93,6 @@ var Endpoints = Routes{
 		"GET",
 		"/api/get_transaction/{txHash}",
 		GetTransaction,
-	},
-	Route{
-		Name:        "GetRecentBlock",
-		Method:      "GET",
-		Pattern:     "/api/get_recent_block",
-		HandlerFunc: GetRecentBlock,
 	},
 	Route{
 		Name:        "GetAllTransactionsFromBlock",
