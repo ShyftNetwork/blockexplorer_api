@@ -1,7 +1,13 @@
 package api
 
 //@NOTE Shyft setting up endpoints
-import "net/http"
+import (
+	"net/http"
+	"github.com/ShyftNetwork/blockexplorer_api/api/blocks"
+	"github.com/ShyftNetwork/blockexplorer_api/api/accounts"
+	"github.com/ShyftNetwork/blockexplorer_api/api/transactions"
+	"github.com/ShyftNetwork/blockexplorer_api/api/broadcast"
+)
 
 //Route stuct
 type Route struct {
@@ -20,120 +26,120 @@ var Endpoints = Routes{
 		"GetAllAccountLength",
 		"GET",
 		"/api/get_all_accounts_length",
-		GetAllAccountsLength,
+		accounts.GetAllAccountsLength,
 	},
 	Route{
 		"GetAccount",
 		"GET",
 		"/api/get_account/{address}",
-		GetAccount,
-	},
-	Route{
-		"GetAccountTxs",
-		"GET",
-		"/api/get_account_txs/{currentPage}/{pageLimit}/{address}",
-		GetAccountTxs,
+		accounts.GetAccount,
 	},
 	Route{
 		"GetAllAccounts",
 		"GET",
 		"/api/get_all_accounts/{currentPage}/{pageLimit}",
-		GetAllAccounts,
+		accounts.GetAllAccounts,
 	},
 	Route{
-		"GetAllBlocksWithoutLimit",
+		"GetAccountTxs",
 		"GET",
-		"/api/get_all_blocks_nolimit",
-		GetAllBlocksWithoutLimit,
-	},
-	Route{
-		"GetAllBlocks",
-		"GET",
-		"/api/get_all_blocks/{currentPage}/{pageLimit}",
-		GetAllBlocks,
-	},
-	Route{
-		"GetAllBlocksLength",
-		"GET",
-		"/api/get_all_blocks_length",
-		GetAllBlocksLength,
-	},
-	Route{
-		"GetBlock",
-		"GET",
-		"/api/get_block/{blockNumber}",
-		GetBlock,
+		"/api/get_account_txs/{currentPage}/{pageLimit}/{address}",
+		transactions.GetAccountTxs,
 	},
 	Route{
 		"GetAllTransactionsWithoutLimit",
 		"GET",
 		"/api/get_all_transactions_nolimit",
-		GetAllTransactionsWithoutLimit,
+		transactions.GetAllTransactionsWithoutLimit,
 	},
 	Route{
 		"GetAllTransactionsLength",
 		"GET",
 		"/api/get_all_transactions_length",
-		SGetAllTransactionsLength,
+		transactions.GetAllTransactionsLength,
 	},
 	Route{
 		"GetAllTransactions",
 		"GET",
 		"/api/get_all_transactions/{currentPage}/{pageLimit}",
-		GetAllTransactions,
+		transactions.GetAllTransactions,
 	},
 	Route{
 		"GetTransaction",
 		"GET",
 		"/api/get_transaction/{txHash}",
-		GetTransaction,
-	},
-	Route{
-		Name:        "GetRecentBlock",
-		Method:      "GET",
-		Pattern:     "/api/get_recent_block",
-		HandlerFunc: GetRecentBlock,
+		transactions.GetTransaction,
 	},
 	Route{
 		Name:        "GetAllTransactionsFromBlock",
 		Method:      "GET",
 		Pattern:     "/api/get_all_transactions_from_block/{currentPage}/{pageLimit}/{blockNumber}",
-		HandlerFunc: GetAllTransactionsFromBlock,
-	},
-	Route{
-		Name:        "GetAllBlocksMinedByAddress",
-		Method:      "GET",
-		Pattern:     "/api/get_blocks_mined/{currentPage}/{pageLimit}/{coinbase}",
-		HandlerFunc: GetAllBlocksMinedByAddress,
+		HandlerFunc: transactions.GetAllTransactionsFromBlock,
 	},
 	Route{
 		"GetInternalTransactions",
 		"GET",
 		"/api/get_internal_transactions/{currentPage}/{pageLimit}",
-		GetInternalTransactions,
+		transactions.GetInternalTransactions,
 	},
 	Route{
 		"GetInternalTransactionsByHash",
 		"GET",
 		"/api/get_internal_transactions/{currentPage}/{pageLimit}/{txHash}",
-		GetInternalTransactionsByHash,
+		transactions.GetInternalTransactionsByHash,
 	},
 	Route{
 		"GetAllInternalTransactionsLength",
 		"GET",
 		"/api/get_internal_transactions_length",
-		GetAllInternalTransactionsLength,
-	},
-	Route{
-		"BroadcastTx",
-		"GET",
-		"/api/broadcast_tx/{transaction_hash}",
-		BroadcastTx,
+		transactions.GetAllInternalTransactionsLength,
 	},
 	Route{
 		"GetSearchQuery",
 		"GET",
 		"/api/search/{query}",
-		GetSearchQuery,
+		transactions.GetSearchQuery,
+	},
+	Route{
+		"GetAllBlocksWithoutLimit",
+		"GET",
+		"/api/get_all_blocks_nolimit",
+		blocks.GetAllBlocksWithoutLimit,
+	},
+	Route{
+		"GetAllBlocks",
+		"GET",
+		"/api/get_all_blocks/{currentPage}/{pageLimit}",
+		blocks.GetAllBlocks,
+	},
+	Route{
+		"GetAllBlocksLength",
+		"GET",
+		"/api/get_all_blocks_length",
+		blocks.GetAllBlocksLength,
+	},
+	Route{
+		"GetBlock",
+		"GET",
+		"/api/get_block/{blockNumber}",
+		blocks.GetBlock,
+	},
+	Route{
+		Name:        "GetRecentBlock",
+		Method:      "GET",
+		Pattern:     "/api/get_recent_block",
+		HandlerFunc: blocks.GetRecentBlock,
+	},
+	Route{
+		Name:        "GetAllBlocksMinedByAddress",
+		Method:      "GET",
+		Pattern:     "/api/get_blocks_mined/{currentPage}/{pageLimit}/{coinbase}",
+		HandlerFunc: blocks.GetAllBlocksMinedByAddress,
+	},
+	Route{
+		"Broadcast",
+		"GET",
+		"/api/broadcast_tx/{transaction_hash}",
+		broadcast.Broadcast,
 	},
 }

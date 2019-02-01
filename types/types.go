@@ -2,11 +2,6 @@ package types
 
 import "time"
 
-// BlockPayload returns slice of Block type
-type BlockPayload struct {
-	Payload []Block			`json:"data"`
-}
-
 // Block returns Block struct
 type Block struct {
 	Hash       string 		`json:"block_hash"`
@@ -23,11 +18,6 @@ type Block struct {
 	Nonce      uint64		`json:"block_nonce"`
 	TxCount    int			`json:"block_txs"`
 	UncleCount int			`json:"block_uncles"`
-}
-
-// TransactionPayload returns slice of Transaction type
-type TransactionPayload struct {
-	Payload []Transaction
 }
 
 // Transaction returns Transaction struct
@@ -49,21 +39,11 @@ type Transaction struct {
 	Data        []byte		`json:"tx_data"`
 }
 
-// AccountPayload returns slice of Account struct
-type AccountPayload struct {
-	Payload []Account
-}
-
 // Account returns account struct
 type Account struct {
 	Addr         string		`json:"address"`
 	Balance      string		`json:"balance"`
 	Nonce		 string		`json:"nonce"`
-}
-
-// InternalTransactionPayload returns slice of InternalTransactionPayload struct
-type InternalTransactionPayload struct {
-	Payload []InteralTransaction
 }
 
 // InteralTransaction returns InteralTransactions struct

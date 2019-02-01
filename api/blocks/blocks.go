@@ -1,121 +1,95 @@
 package blocks
 
 import (
-	"encoding/json"
+	"net/http"
+
+	_ "github.com/lib/pq" //github.com/lib/pq needed for sqlx transactions
 	"github.com/ShyftNetwork/blockexplorer_api/logger"
-	"github.com/jmoiron/sqlx"
-	"github.com/ShyftNetwork/blockexplorer_api/types"
 	"github.com/ShyftNetwork/blockexplorer_api/db"
+	"github.com/gorilla/mux"
 )
 
-// BlockArrayMarshalling marshalls into account struct
-func BlockArrayMarshalling(rows *sqlx.Rows) []byte {
-	var b types.BlockPayload
-	var blocks []byte
-
-	for rows.Next() {
-		block := types.Block{}
-		err := rows.StructScan(&block)
-		if err != nil {
-			logger.Warn("Unable to retrieve rows: " + err.Error())
-			return nil
-		}
-		b.Payload = append(b.Payload, block)
-		serializedPayload, err := json.Marshal(b.Payload)
-		if err != nil {
-			logger.Warn("Unable to retrieve rows: " + err.Error())
-			return nil
-		}
-		blocks = serializedPayload
-	}
-	if err := rows.Close(); err != nil {
-		logger.Warn("Unable to close row connection: " + err.Error())
-	}
-	return blocks
-}
-
-// BlockMarshalling marshalls into account struct
-func BlockMarshalling(row *sqlx.Row) ([]byte, error) {
-	block := types.Block{}
-	err := row.StructScan(&block)
+//GetBlock returns contextual block data
+func GetBlock(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	blockNumber := vars["blockNumber"]
+	block, err := db.Query(db.GetBlock, "block", blockNumber)
 	if err != nil {
-		logger.Warn("Unable to retrieve rows: " + err.Error())
-		return nil, err
+		http.Error(w, err.Error(), 500)
+		return
 	}
-	serializedPayload, err := json.Marshal(block)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(block))
+}
+
+// GetAllBlocksWithoutLimit returns all blocks in table
+func GetAllBlocksWithoutLimit(w http.ResponseWriter, r *http.Request) {
+
+	blocks, err := db.Query(db.GetAllBlocksNoLimit, "block")
 	if err != nil {
-		logger.Warn("Unable to serialize row: " + err.Error())
-		return nil, err
+		http.Error(w, err.Error(), 500)
+		return
 	}
-	return serializedPayload, nil
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(blocks))
 }
 
-// BlockArrayQueries queries db
-func BlockArrayQueries(db *db.SPGDatabase, query string, currentPage int64, pageLimit int64, identifier string) ([]byte, error) {
-	switch {
-	case len(identifier) > 0 && currentPage > 0:
-		var offset = (currentPage - 1) * pageLimit
-		rows, err := db.Db.Queryx(query, pageLimit, offset, identifier)
-		if err != nil {
-			logger.Warn("Unable to retrieve rows: " + err.Error())
-			return nil, err
-		}
-		blocks := BlockArrayMarshalling(rows)
-		return blocks, nil
-	case currentPage > 0:
-		var offset = (currentPage - 1) * pageLimit
-		rows, err := db.Db.Queryx(query, pageLimit, offset)
-		if err != nil {
-			logger.Warn("Unable to retrieve rows: " + err.Error())
-			return nil, err
-		}
-		blocks := BlockArrayMarshalling(rows)
-		return blocks, nil
-	default:
-		rows, err := db.Db.Queryx(query)
-		if err != nil {
-			logger.Warn("Unable to retrieve rows: " + err.Error())
-			return nil, err
-		}
-		blocks := BlockArrayMarshalling(rows)
-		return blocks, nil
-	}
-}
+// GetAllBlocks returns all blocks
+func GetAllBlocks(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	currentPage := vars["currentPage"]
+	pageLimit := vars["pageLimit"]
 
-// BlockQueries queries db
-func BlockQueries(db *db.SPGDatabase, query string, identifier string) ([]byte, error) {
-	switch {
-	case len(identifier) > 0:
-		row := db.Db.QueryRowx(query, identifier)
-		b, err := BlockMarshalling(row)
-		if err != nil {
-			logger.Warn("Unable to query: " + err.Error())
-			return nil, err
-		}
-		return b, nil
-	default:
-		row := db.Db.QueryRowx(query)
-		b, err := BlockMarshalling(row)
-		if err != nil {
-			logger.Warn("Unable to query: " + err.Error())
-			return nil, err
-		}
-		return b, nil
-	}
-}
-
-// RecordCountQuery returns count of records in specified table
-func RecordCountQuery(db *db.SPGDatabase, query string) []byte {
-	row := db.Db.QueryRowx(query)
-
-	count := types.RecordCount{}
-	if err := row.StructScan(&count); err != nil {
-		logger.Warn("Unable to scan row into struct: " + err.Error())
-	}
-	serializedPayload, err := json.Marshal(count)
+	blocks, err := db.Query(db.GetAllBlocks, "block", currentPage, pageLimit)
 	if err != nil {
-		logger.Warn("Unable to serialize row: " + err.Error())
+		http.Error(w, err.Error(), 500)
+		return
 	}
-	return serializedPayload
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(blocks))
 }
 
+// GetRecentBlock returns most recent block height
+func GetRecentBlock(w http.ResponseWriter, r *http.Request) {
+	block, err := db.Query(db.GetRecentBlock, "block")
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(block))
+}
+
+// GetAllBlocksMinedByAddress returns all blocks mined by specific address
+func GetAllBlocksMinedByAddress(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	coinbase := vars["coinbase"]
+	currentPage := vars["currentPage"]
+	pageLimit := vars["pageLimit"]
+
+	blocks, err := db.Query(db.GetAllBlocksMinedByAddress, "block", currentPage, pageLimit, coinbase)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(blocks))
+}
+
+// GetAllBlocksLength Count all rows in Blocks Table
+func GetAllBlocksLength(w http.ResponseWriter, r *http.Request) {
+	count := db.RecordCountQuery(db.GetBlockCount)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(count))
+}
