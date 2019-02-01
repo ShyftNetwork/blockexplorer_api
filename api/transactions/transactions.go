@@ -1,133 +1,160 @@
 package transactions
 
 import (
-	"encoding/json"
-
-	"github.com/jmoiron/sqlx"
-	"github.com/ShyftNetwork/blockexplorer_api/types"
+	"net/http"
+	_ "github.com/lib/pq" //github.com/lib/pq needed for sqlx transactions
 	"github.com/ShyftNetwork/blockexplorer_api/logger"
 	"github.com/ShyftNetwork/blockexplorer_api/db"
+	"github.com/gorilla/mux"
 )
 
-// TransactionArrayMarshalling marshalls into tx struct
-func TransactionArrayMarshalling(rows *sqlx.Rows) []byte {
-	var t types.TransactionPayload
-	var txs []byte
+// GetAllTransactionsLength Count all rows in Blocks Table
+func GetAllTransactionsLength(w http.ResponseWriter, r *http.Request) {
+	count := db.RecordCountQuery(db.GetTransactionCount)
 
-	for rows.Next() {
-		tx := types.Transaction{}
-		err := rows.StructScan(&tx)
-		if err != nil {
-			logger.Warn("Unable to retrieve rows: " + err.Error())
-			return nil
-		}
-		t.Payload = append(t.Payload, tx)
-		serializedPayload, err := json.Marshal(t.Payload)
-		if err != nil {
-			logger.Warn("Unable to serialize payload: " + err.Error())
-		}
-		txs = serializedPayload
-	}
-	if err := rows.Close(); err != nil {
-		logger.Warn("Unable to close row connection: " + err.Error())
-	}
-
-	return txs
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(count))
 }
 
-// TransactionArrayQueries queries db
-func TransactionArrayQueries(db *db.SPGDatabase, query string, currentPage int64, pageLimit int64, identifier string) ([]byte, error) {
-	switch {
-	case len(identifier) > 0 && currentPage > 0:
-		var offset = (currentPage - 1) * pageLimit
-		rows, err := db.Db.Queryx(query, pageLimit, offset, identifier)
-		if err != nil {
-			logger.Warn("Unable to query: " + err.Error())
-			return nil, err
-		}
-		txs := TransactionArrayMarshalling(rows)
-		return txs, nil
-	case currentPage > 0:
-		var offset = (currentPage - 1) * pageLimit
-		rows, err := db.Db.Queryx(query, pageLimit, offset)
-		if err != nil {
-			logger.Warn("Unable to query: " + err.Error())
-			return nil, err
-		}
-		txs := TransactionArrayMarshalling(rows)
-		return txs, nil
-	default:
-		rows, err := db.Db.Queryx(query)
-		if err != nil {
-			logger.Warn("Unable to query: " + err.Error())
-			return nil, err
-		}
-		txs := TransactionArrayMarshalling(rows)
-		return txs, nil
-	}
-}
-
-// TransactionMarshalling marshalls into tx struct
-func TransactionMarshalling(row *sqlx.Row) []byte {
-	tx := types.Transaction{}
-	err := row.StructScan(&tx)
+// GetAllTransactionsWithoutLimit returns all rows in Blocks Table
+func GetAllTransactionsWithoutLimit(w http.ResponseWriter, r *http.Request) {
+	txs, err := db.Query(db.GetAllTransactionsNoLimit, "tx")
 	if err != nil {
-		logger.Warn("Unable to retrieve row: " + err.Error())
-		return nil
+		http.Error(w, err.Error(), 500)
+		return
 	}
-	serializedPayload, err := json.Marshal(tx)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(txs))
+}
+
+// GetTransaction gets txs
+func GetTransaction(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	txHash := vars["txHash"]
+	transaction, err := db.Query(db.GetTransaction, "tx", txHash)
 	if err != nil {
-		logger.Warn("Unable to serialize payload: " + err.Error())
+		http.Error(w, err.Error(), 500)
+		return
 	}
-	return serializedPayload
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(transaction))
 }
 
-// TransactionQuery queries db
-func TransactionQuery(db *db.SPGDatabase, query string, identifier string) ([]byte, error) {
-	row := db.Db.QueryRowx(query, identifier)
-	transaction := TransactionMarshalling(row)
-	return transaction, nil
-}
+// GetAllTransactions gets txs
+func GetAllTransactions(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	currentPage := vars["currentPage"]
+	pageLimit := vars["pageLimit"]
 
-// InternalTransactionArrayMarshalling marshalls into internaltx struct
-func InternalTransactionArrayMarshalling(rows *sqlx.Rows) []byte {
-	var i types.InternalTransactionPayload
-	var internals []byte
+	txs, err := db.Query(db.GetAllTransactions, "tx", currentPage, pageLimit)
 
-	for rows.Next() {
-		internal := types.InteralTransaction{}
-		err := rows.StructScan(&internal)
-		if err != nil {
-			logger.Warn("Unable to retrieve rows: " + err.Error())
-		}
-		i.Payload = append(i.Payload, internal)
-		serializedPayload, err := json.Marshal(i.Payload)
-		if err != nil {
-			logger.Warn("Unable to serialize payload: " + err.Error())
-		}
-		internals = serializedPayload
-	}
-	if err := rows.Close(); err != nil {
-		logger.Warn("Unable to close row connection: " + err.Error())
-	}
-	return internals
-}
-
-// InternalTransactionArrayQuery queries db
-func InternalTransactionArrayQuery(db *db.SPGDatabase, query string, currentPage int64, pageLimit int64, identifer string) ([]byte, error) {
-	var offset = (currentPage - 1) * pageLimit
-	rows, err := db.Db.Queryx(query, pageLimit, offset, identifer)
 	if err != nil {
-		logger.Warn("Unable to query: " + err.Error())
-		return nil, err
+		http.Error(w, err.Error(), 500)
+		return
 	}
-	txs := InternalTransactionArrayMarshalling(rows)
-	return txs, nil
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(txs))
 }
 
-func SearchQuery(db *db.SPGDatabase, query string, identifier string) ([]byte, error) {
-	row := db.Db.QueryRowx(query, identifier)
-	transaction := TransactionMarshalling(row)
-	return transaction, nil
+// GetAllTransactionsFromBlock returns all txs from specified block
+func GetAllTransactionsFromBlock(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	currentPage := vars["currentPage"]
+	pageLimit := vars["pageLimit"]
+	blockNumber := vars["blockNumber"]
+
+	transactions, err := db.Query(db.GetAllTransactionsFromBlock, "tx", currentPage, pageLimit, blockNumber)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(transactions))
+}
+
+// GetAccountTxs returns account txs
+func GetAccountTxs(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	address := vars["address"]
+	currentPage := vars["currentPage"]
+	pageLimit := vars["pageLimit"]
+
+	transactions, err := db.Query(db.GetAccountTransactions, "tx", currentPage, pageLimit, address)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(transactions))
+}
+
+// GetAllInternalTransactionsLength Count all rows in Blocks Table
+func GetAllInternalTransactionsLength(w http.ResponseWriter, r *http.Request) {
+	count := db.RecordCountQuery(db.GetInternalTransactionLength)
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(count))
+}
+
+//GetInternalTransactionsByHash gets internal txs specified by hash
+func GetInternalTransactionsByHash(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	txHash := vars["txHash"]
+	currentPage := vars["currentPage"]
+	pageLimit := vars["pageLimit"]
+
+	transactions, err := db.Query(db.GetInternalTransaction, "itx", currentPage, pageLimit, txHash)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(transactions))
+}
+
+//GetInternalTransactions gets internal txs
+func GetInternalTransactions(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	currentPage := vars["currentPage"]
+	pageLimit := vars["pageLimit"]
+
+	transactions, err := db.Query(db.GetAllInternalTransactions, "itx",currentPage, pageLimit)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(transactions))
+}
+
+
+// GetSearchQuery returns search query from tx table
+func GetSearchQuery(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	query := vars["query"]
+
+	response, err := db.Query(db.SearchQuery, query, "tx")
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(response))
 }
 

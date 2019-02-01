@@ -1,74 +1,51 @@
 package accounts
 
 import (
-	"encoding/json"
-	"github.com/jmoiron/sqlx"
-	"github.com/ShyftNetwork/blockexplorer_api/types"
+	"net/http"
+
+	_ "github.com/lib/pq" //github.com/lib/pq needed for sqlx transactions
 	"github.com/ShyftNetwork/blockexplorer_api/logger"
 	"github.com/ShyftNetwork/blockexplorer_api/db"
+	"github.com/gorilla/mux"
 )
 
-// AccountArrayMarshalling marshalls into account struct
-func AccountArrayMarshalling(rows *sqlx.Rows) []byte {
-	var a types.AccountPayload
-	var accounts []byte
+// GetAllAccountsLength Count all rows in accounts Table
+func GetAllAccountsLength(w http.ResponseWriter, r *http.Request) {
+	count := db.RecordCountQuery(db.GetAccountCount)
 
-	for rows.Next() {
-		account := types.Account{}
-		err := rows.StructScan(&account)
-		if err != nil {
-			logger.Warn("Unable to retrieve rows: " + err.Error())
-		}
-		a.Payload = append(a.Payload, account)
-		serializedPayload, err := json.Marshal(a.Payload)
-		if err != nil {
-			logger.Warn("Unable to marshal payload: " + err.Error())
-		}
-		accounts = serializedPayload
-	}
-	if err := rows.Err(); err != nil {
-		logger.Warn("Unable to retrieve row: " + err.Error())
-	}
-	if err := rows.Close(); err != nil {
-		logger.Warn("Unable to close row connection: " + err.Error())
-	}
-	return accounts
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(count))
 }
 
-// AccountArrayQueries queries db
-func AccountArrayQueries(db *db.SPGDatabase, query string, currentPage int64, pageLimit int64, identifier string) ([]byte, error) {
-	var offset = (currentPage - 1) * pageLimit
-	rows, err := db.Db.Queryx(query, pageLimit, offset)
+// GetAccount returns specific account data; balance, nonce
+func GetAccount(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	address := vars["address"]
+
+	account, err := db.Query(db.GetAccount,"account", address)
 	if err != nil {
-		logger.Warn("Unable to connect: " + err.Error())
-		return nil, err
+		http.Error(w, err.Error(), 500)
+		return
 	}
-	accounts := AccountArrayMarshalling(rows)
-	return accounts, nil
+
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(account))
 }
 
-// AccountMarshalling marshalls bytes to struct
-func AccountMarshalling(row *sqlx.Row) ([]byte, error) {
-	account := types.Account{}
-	err := row.StructScan(&account)
-	if err != nil {
-		logger.Warn("Unable to retrieve row: " + err.Error())
-		return nil, err
-	}
-	serializedPayload, err := json.Marshal(account)
-	if err != nil {
-		logger.Warn("Unable to marshal payload: " + err.Error())
-	}
-	return serializedPayload, nil
-}
+// GetAllAccounts returns all accounts
+func GetAllAccounts(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	currentPage := vars["currentPage"]
+	pageLimit := vars["pageLimit"]
 
-// AccountQuery queries db
-func AccountQuery(db *db.SPGDatabase, query string, currentPage int64, pageLimit int64, identifier string) ([]byte, error) {
-	row := db.Db.QueryRowx(query, identifier)
-	account, err := AccountMarshalling(row)
+	accounts, err := db.Query(db.GetAllAccounts,"account", currentPage, pageLimit)
 	if err != nil {
-		logger.Warn("Unable to connect: " + err.Error())
-		return nil, err
+		http.Error(w, err.Error(), 500)
+		return
 	}
-	return account, nil
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	logger.WriteLogger(w.Write(accounts))
 }
